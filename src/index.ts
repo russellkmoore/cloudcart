@@ -1,29 +1,38 @@
-import { OpenAPIRouter } from "@cloudflare/itty-router-openapi";
-import { TaskCreate } from "./endpoints/taskCreate";
-import { TaskDelete } from "./endpoints/taskDelete";
-import { TaskFetch } from "./endpoints/taskFetch";
-import { TaskList } from "./endpoints/taskList";
+import { OpenAPIRouter } from '@cloudflare/itty-router-openapi';
+import { createCors } from 'itty-router'
+import createCartHandler from './endpoints/createCart';
+import addItemToCartHandler from './endpoints/addItemToCart';
+import removeItemFromCartHandler from './endpoints/removeItemFromCart';
+import clearCartHandler from './endpoints/clearCart';
+import getCartCountHandler from './endpoints/getCartCount';
+import getTotalCostHandler from './endpoints/getTotalCost';
+import getCartHandler from './endpoints/getCart';
+import updateQuantityHandler from './endpoints/updateQuantity';
 
-export const router = OpenAPIRouter({
-	docs_url: "/",
+// get preflight and corsify pair
+const { preflight, corsify } = createCors();
+
+// Create a router
+const router = OpenAPIRouter({
+	before: [preflight],  // add preflight upstream
+	finally: [corsify],   // and corsify downstream
+	//schema: './openapi.json',
+	docs_url: '/',
 });
 
-router.get("/api/tasks/", TaskList);
-router.post("/api/tasks/", TaskCreate);
-router.get("/api/tasks/:taskSlug/", TaskFetch);
-router.delete("/api/tasks/:taskSlug/", TaskDelete);
+// Define routes
+router.post('/create', createCartHandler);
+router.post('/add-item', addItemToCartHandler);
+router.post('/remove-item', removeItemFromCartHandler);
+router.post('/clear-cart', clearCartHandler);
+router.post('/get-cart-count', getCartCountHandler);
+router.post('/get-total-cost', getTotalCostHandler);
+router.post('/get-cart', getCartHandler);
+router.post('/update-quantity', updateQuantityHandler);
 
-// 404 for everything else
-router.all("*", () =>
-	Response.json(
-		{
-			success: false,
-			error: "Route not found",
-		},
-		{ status: 404 }
-	)
-);
-
+// Handle requests
 export default {
-	fetch: router.handle,
-} satisfies ExportedHandler;
+	async fetch(request: Request) {
+		return router.handle(request);
+	},
+};
