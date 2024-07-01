@@ -1,6 +1,5 @@
 import { OpenAPIRouter } from '@cloudflare/itty-router-openapi';
 import { createCors } from 'itty-router'
-import createCartHandler from './endpoints/createCart';
 import addItemToCartHandler from './endpoints/addItemToCart';
 import removeItemFromCartHandler from './endpoints/removeItemFromCart';
 import clearCartHandler from './endpoints/clearCart';
@@ -16,18 +15,17 @@ const { preflight, corsify } = createCors();
 const router = OpenAPIRouter({
 	before: [preflight],  // add preflight upstream
 	finally: [corsify],   // and corsify downstream
-	//schema: './openapi.json',
+	schema: './openapi.json',
 	docs_url: '/',
 });
 
 // Define routes
-router.post('/create', createCartHandler);
-router.post('/add-item', addItemToCartHandler);
-router.post('/remove-item', removeItemFromCartHandler);
-router.post('/clear-cart', clearCartHandler);
-router.post('/get-cart-count', getCartCountHandler);
-router.post('/get-total-cost', getTotalCostHandler);
-router.post('/get-cart', getCartHandler);
+router.post('/add-item/', addItemToCartHandler);
+router.post('/remove-item/', removeItemFromCartHandler);
+router.get('/clear-cart/:userId/', clearCartHandler);
+router.get('/get-cart-count/:userId/', getCartCountHandler);
+router.post('/get-total-cost:/:userId/', getTotalCostHandler);
+router.get('/get-cart/:userId/', getCartHandler);
 router.post('/update-quantity', updateQuantityHandler);
 
 // Handle requests

@@ -6,49 +6,9 @@
 		"description": "This is a web service for managing a user's shopping cart"
 	},
 	"paths": {
-		"/create": {
-			"post": {
-				"summary": "Create a new shopping cart",
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"type": "object",
-								"properties": {
-									"userId": {
-										"type": "string"
-									},
-									"productId": {
-										"type": "number"
-									},
-									"name": {
-										"type": "string"
-									},
-									"price": {
-										"type": "number"
-									},
-									"quantity": {
-										"type": "number"
-									}
-								}
-							}
-						}
-					}
-				},
-				"responses": {
-					"201": {
-						"description": "Created"
-					},
-					"400": {
-						"description": "Bad Request"
-					}
-				}
-			}
-		},
 		"/add-item": {
 			"post": {
-				"summary": "Add an item to an existing shopping cart",
+				"summary": "Add an item to a shopping cart. Create a cart if needed.",
 				"requestBody": {
 					"required": true,
 					"content": {
