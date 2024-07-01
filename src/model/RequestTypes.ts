@@ -1,20 +1,20 @@
 import { Str, Num, Int } from "@cloudflare/itty-router-openapi";
 
 export const AddItemRequest = {
-	userId: new Str({ required: true }), 
-	productId: new Str({ required: true }), 
-	name: new Str({ required: true }), 
-	price: new Str({ required: true }),
-	quantity: new Int({ required: true }),
+	userId: new Str({ example: "user123" }),
+	productId: new Str({ example: "prod456" }),
+	name: new Str({ example: "Sample Product" }),
+	price: new Num({ example: "19.99" }),
+	quantity: new Int({ example: "1" }),
 };
 
 export const RemoveItemRequest = {
-	userId: new Str({ required: true }), 
-	productId: new Str({ required: true }), 
+	userId: new Str({ example: "user123" }),
+	productId: new Str({ example: "prod456" }),
 };
 
 export const UpdateItemRequest = {
-	userId: new Str({ required: true }), 
-	productId: new Str({ required: true }), 
-	newQuantity: new Int({ required: true }),
+	userId: new Str({ example: "user123" }),
+	productId: new Str({ example: "prod456" }),
+	newQuantity: new Int({ example: "1" }),
 };

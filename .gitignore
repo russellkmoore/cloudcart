@@ -173,3 +173,8 @@ dist
 .wrangler
 src/.DS_Store
 src/endpoints/.DS_Store
+.DS_Store
+.DS_Store
+/.nova
+.DS_Store
+.DS_Store

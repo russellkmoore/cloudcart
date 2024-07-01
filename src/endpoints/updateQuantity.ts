@@ -1,47 +1,69 @@
 // src/endpoints/updateQuantity.ts
 import { Request } from '@cloudflare/itty-router-openapi';
 import { ShoppingCart } from '../model/ShoppingCart';
-import { OpenAPIRoute, OpenAPIRouteSchema } from "@cloudflare/itty-router-openapi";
+import { OpenAPIRoute, OpenAPIRouteSchema } from '@cloudflare/itty-router-openapi';
+import { UpdateItemRequest } from '../model/RequestTypes';
 
 export class UpdateQuantityHandler extends OpenAPIRoute {
 	static schema: OpenAPIRouteSchema = {
 		tags: ["Cart"],
-		summary: "Updated the quantity of an item in cart.",
-		requestBody: RemoveItemRequest,
+		summary: "Updates the quantity of an item in the cart.",
+		requestBody: UpdateItemRequest,
 		responses: {
 			"200": {
 				description: "Returns the updated cart. Quantity updated.",
-				schema: {
-					success: Boolean,
-					result: {
-						cart: ShoppingCart,
+				content: {
+					'application/json': {
+						schema: {
+							type: 'object',
+							properties: {
+								result: {
+									type: 'string',
+								},
+							},
+						},
 					},
 				},
 			},
 			"400": {
 				description: "Invalid Request",
-				schema: {
-					success: Boolean,
-					error: String,
+				content: {
+					'application/json': {
+						schema: {
+							type: 'object',
+							properties: {
+								success: { type: 'boolean' },
+								error: { type: 'string' },
+							},
+						},
+					},
 				},
 			},
 			"404": {
-				description: "Cart Not Found",
-				schema: {
-					success: Boolean,
-					error: String,
+				description: "Cart or Item Not Found",
+				content: {
+					'application/json': {
+						schema: {
+							type: 'object',
+							properties: {
+								success: { type: 'boolean' },
+								error: { type: 'string' },
+							},
+						},
+					},
 				},
 			},
 		},
 	};
 
 	async handle(request: Request, env: any, context: any, data: Record < string, any > ) {
-		// Retrieve the validated request body
 		const updateItemRequest = data.body;
 		try {
 			const cartData = await env.CARTS.get(`cart-${updateItemRequest.userId}`);
 			if (!cartData) {
-				return Response.json({ success: false, error: "Cart not found", }, { status: 404, });
+				return new Response(
+					JSON.stringify({ success: false, error: "Cart not found" }), { status: 404, headers: { 'Content-Type': 'application/json' } }
+				);
 			}
 
 			const cart = new ShoppingCart();
@@ -49,18 +71,21 @@ export class UpdateQuantityHandler extends OpenAPIRoute {
 
 			const item = cart.getItems().find(item => item.id === updateItemRequest.productId);
 			if (!item) {
-				return Response.json({ success: false, error: "Item not found in cart.", }, { status: 404, });
+				return new Response(
+					JSON.stringify({ success: false, error: "Item not found in cart." }), { status: 404, headers: { 'Content-Type': 'application/json' } }
+				);
 			}
-			item.quantity = newQuantity;
+			item.quantity = updateItemRequest.newQuantity;
 
-			await env.CARTS.put(`cart-${userId}`, cart.toJSON());
-			return {
-				success: true,
-				cart: cart.toJSON(),
-			};
+			await env.CARTS.put(`cart-${updateItemRequest.userId}`, cart.toJSON());
+			return new Response(
+				cart.toJSON(), { status: 200, headers: { 'Content-Type': 'application/json' } }
+			);
 
 		} catch (error) {
-			return Response.json({ success: false, error: error.message, }, { status: 400, });
+			return new Response(
+				JSON.stringify({ success: false, error: error.message }), { status: 400, headers: { 'Content-Type': 'application/json' } }
+			);
 		}
 	}
 }

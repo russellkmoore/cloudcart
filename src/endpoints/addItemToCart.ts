@@ -1,7 +1,7 @@
 // src/endpoints/addItemToCart.ts
 import { Request } from '@cloudflare/itty-router-openapi';
 import { Item, ShoppingCart } from '../model/ShoppingCart';
-import { OpenAPIRoute, OpenAPIRouteSchema } from "@cloudflare/itty-router-openapi";
+import { OpenAPIRoute, OpenAPIRouteSchema } from '@cloudflare/itty-router-openapi';
 import { AddItemRequest } from '../model/RequestTypes';
 
 export class AddItemToCartHandler extends OpenAPIRoute {
@@ -12,59 +12,72 @@ export class AddItemToCartHandler extends OpenAPIRoute {
 		responses: {
 			"200": {
 				description: "Returns the updated cart",
-				schema: {
-					success: Boolean,
-					result: {
-						cart: ShoppingCart,
+				content: {
+					'application/json': {
+						schema: {
+							type: 'object',
+							properties: {
+								result: {
+									type: 'string',
+								},
+							},
+						},
 					},
 				},
 			},
 			"400": {
 				description: "Invalid Request",
-				schema: {
-					success: Boolean,
-					error: String,
+				content: {
+					'application/json': {
+						schema: {
+							type: 'object',
+							properties: {
+								success: { type: 'boolean' },
+								error: { type: 'string' },
+							},
+						},
+					},
 				},
 			},
 			"404": {
 				description: "Cart Not Found",
-				schema: {
-					success: Boolean,
-					error: String,
+				content: {
+					'application/json': {
+						schema: {
+							type: 'object',
+							properties: {
+								success: { type: 'boolean' },
+								error: { type: 'string' },
+							},
+						},
+					},
 				},
 			},
 		},
 	};
-	
-	async handle( request: Request, env: any, context: any, data: Record<string, any>) {
-		// Retrieve the validated request body
+
+	async handle(request: Request, env: any, context: any, data: Record < string, any > ) {
+		console.log("data.body is:" + data);
 		const addItemRequest = data.body;
 		try {
 			const cartData = await env.CARTS.get(`cart-${addItemRequest.userId}`);
-			if (!cartData) {
-				return Response.json(
-					{ success: false, error: "Cart not found", },
-					{ status: 404, }
-				);
+			let cart = new ShoppingCart();
+			if (cartData) {
+				cart.fromJSON(cartData);
 			}
-			
-			const cart = new ShoppingCart();
-			cart.fromJSON(cartData);
+
 			const item = new Item(addItemRequest.productId, addItemRequest.name, addItemRequest.price, addItemRequest.quantity);
 			cart.addItem(item);
-			
-			await env.CARTS.put(`cart-${userId}`, cart.toJSON());
-			return {
-				success: true,
-				cart: cart.toJSON(),
-			};
-			
+
+			await env.CARTS.put(`cart-${addItemRequest.userId}`, cart.toJSON());
+
+			return new Response(
+				cart.toJSON(), { status: 200, headers: { 'Content-Type': 'application/json' } }
+			);
 		} catch (error) {
-			return  Response.json(
-				{ success: false, error: error.message, },
-				{ status: 400, }
+			return new Response(
+				JSON.stringify({ success: false, error: error.message }), { status: 400, headers: { 'Content-Type': 'application/json' } }
 			);
 		}
 	}
 }
-

@@ -1,36 +1,33 @@
 import { OpenAPIRouter } from '@cloudflare/itty-router-openapi';
-import { createCors } from 'itty-router'
-import addItemToCartHandler from './endpoints/addItemToCart';
-import removeItemFromCartHandler from './endpoints/removeItemFromCart';
-import clearCartHandler from './endpoints/clearCart';
-import getCartCountHandler from './endpoints/getCartCount';
-import getTotalCostHandler from './endpoints/getTotalCost';
-import getCartHandler from './endpoints/getCart';
-import updateQuantityHandler from './endpoints/updateQuantity';
+import { createCors } from 'itty-router';
+import { AddItemToCartHandler } from './endpoints/addItemToCart';
+import { RemoveItemFromCartHandler } from './endpoints/removeItemFromCart';
+import { ClearCartHandler } from './endpoints/clearCart';
+import { GetCartCountHandler } from './endpoints/getCartCount';
+import { GetTotalCostHandler } from './endpoints/getTotalCost';
+import { GetCartHandler } from './endpoints/getCart';
+import { UpdateQuantityHandler } from './endpoints/updateQuantity';
 
 // get preflight and corsify pair
 const { preflight, corsify } = createCors();
 
 // Create a router
 const router = OpenAPIRouter({
-	before: [preflight],  // add preflight upstream
-	finally: [corsify],   // and corsify downstream
-	schema: './openapi.json',
+	before: [preflight], // add preflight upstream
+	finally: [corsify], // and corsify downstream
 	docs_url: '/',
 });
 
 // Define routes
-router.post('/add-item/', addItemToCartHandler);
-router.post('/remove-item/', removeItemFromCartHandler);
-router.get('/clear-cart/:userId/', clearCartHandler);
-router.get('/get-cart-count/:userId/', getCartCountHandler);
-router.post('/get-total-cost:/:userId/', getTotalCostHandler);
-router.get('/get-cart/:userId/', getCartHandler);
-router.post('/update-quantity', updateQuantityHandler);
+router.post('/add-item', AddItemToCartHandler);
+router.post('/remove-item', RemoveItemFromCartHandler);
+router.post('/clear-cart/:userId', ClearCartHandler);
+router.get('/get-cart-count/:userId', GetCartCountHandler);
+router.get('/get-total-cost/:userId', GetTotalCostHandler);
+router.get('/get-cart/:userId', GetCartHandler);
+router.post('/update-quantity', UpdateQuantityHandler);
 
 // Handle requests
 export default {
-	async fetch(request: Request) {
-		return router.handle(request);
-	},
-};
+	fetch: router.handle,
+} satisfies ExportedHandler;

@@ -1,8 +1,7 @@
 // src/endpoints/getCart.ts
 import { Request } from '@cloudflare/itty-router-openapi';
-import { ShoppingCart } from '../model/ShoppingCart';
-import { OpenAPIRoute, OpenAPIRouteSchema } from "@cloudflare/itty-router-openapi";
-
+import { OpenAPIRoute, OpenAPIRouteSchema, Path } from '@cloudflare/itty-router-openapi';
+import { Item, ShoppingCart } from '../model/ShoppingCart';
 
 export class GetCartHandler extends OpenAPIRoute {
 	static schema: OpenAPIRouteSchema = {
@@ -15,47 +14,72 @@ export class GetCartHandler extends OpenAPIRoute {
 		},
 		responses: {
 			"200": {
-				description: "Success. Returns your cart..",
-				schema: {
-					success: Boolean,
-					result: {
-						cart: ShoppingCart,
+				description: "Returns the cart",
+				content: {
+					'application/json': {
+						schema: {
+							type: 'object',
+							properties: {
+								result: {
+									type: 'string',
+								},
+							},
+						},
 					},
 				},
 			},
 			"400": {
 				description: "Invalid Request",
-				schema: {
-					success: Boolean,
-					error: String,
+				content: {
+					'application/json': {
+						schema: {
+							type: 'object',
+							properties: {
+								success: { type: 'boolean' },
+								error: { type: 'string' },
+							},
+						},
+					},
 				},
 			},
 			"404": {
 				description: "Cart Not Found",
-				schema: {
-					success: Boolean,
-					error: String,
+				content: {
+					'application/json': {
+						schema: {
+							type: 'object',
+							properties: {
+								success: { type: 'boolean' },
+								error: { type: 'string' },
+							},
+						},
+					},
 				},
 			},
 		},
 	};
 
 	async handle(request: Request, env: any, context: any, data: Record < string, any > ) {
-		// Retrieve the validated request body
-		const { userID } = data.params;
+		const { userId } = data.params;
 		try {
-			const cartData = await env.CARTS.get(`cart-${AddItemRequest.userId}`);
+			const cartData = await env.CARTS.get(`cart-${userId}`);
 			if (!cartData) {
-				return Response.json({ success: false, error: "Cart not found", }, { status: 404, });
+				return new Response(
+					JSON.stringify({ success: false, error: "Cart not found" }), { status: 404, headers: { 'Content-Type': 'application/json' } }
+				);
 			}
+			
+			let cart = new ShoppingCart();
+			cart.fromJSON(cartData);
 
-			return {
-				success: true,
-				cart: cartData.toJSON(),
-			};
+			return new Response(
+				cart.toJSON(), { status: 200, headers: { 'Content-Type': 'application/json' } }
+			);
 
 		} catch (error) {
-			return Response.json({ success: false, error: error.message, }, { status: 400, });
+			return new Response(
+				JSON.stringify({ success: false, error: error.message }), { status: 400, headers: { 'Content-Type': 'application/json' } }
+			);
 		}
 	}
 }

@@ -12,7 +12,7 @@ export class Item {
 
 // ShoppingCart class
 export class ShoppingCart {
-	private items: Item[] = [];
+	public items: Item[] = [];
 
 	addItem(item: Item): void {
 		const existingItem = this.items.find(i => i.id === item.id);
@@ -27,12 +27,17 @@ export class ShoppingCart {
 		this.items = this.items.filter(item => item.id !== itemId);
 	}
 
-	getTotalCost(): number {
-		return this.items.reduce((total, item) => total + item.price * item.quantity, 0);
+	getTotalCost(): string {
+		const total = this.items.reduce((total, item) => total + item.price * item.quantity, 0);
+		return total.toFixed(2);
 	}
 
 	getItems(): Item[] {
 		return this.items;
+	}
+
+	getItemCount(): number {
+		return this.items.reduce((count, item) => count + item.quantity, 0);
 	}
 
 	clearCart(): void {
@@ -40,11 +45,17 @@ export class ShoppingCart {
 	}
 
 	toJSON(): string {
-		return JSON.stringify(this.items);
+		return JSON.stringify({
+			cart: {
+				items: this.getItems(),
+				totalCost: this.getTotalCost(),
+				itemCount: this.getItemCount()
+			}
+		});
 	}
 
 	fromJSON(json: string): void {
-		const items = JSON.parse(json);
+		const items = JSON.parse(json).cart.items;
 		this.items = items.map((item: any) => new Item(item.id, item.name, item.price, item.quantity));
 	}
 }
