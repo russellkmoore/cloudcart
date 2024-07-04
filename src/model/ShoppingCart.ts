@@ -13,6 +13,8 @@ export class Item {
 // ShoppingCart class
 export class ShoppingCart {
 	public items: Item[] = [];
+	public creationDate: Date = new Date();
+	public dateLastUpdated: Date = new Date();
 
 	addItem(item: Item): void {
 		const existingItem = this.items.find(i => i.id === item.id);
@@ -21,10 +23,12 @@ export class ShoppingCart {
 		} else {
 			this.items.push(item);
 		}
+		this.dateLastUpdated = new Date();
 	}
 
 	removeItem(itemId: number): void {
 		this.items = this.items.filter(item => item.id !== itemId);
+		this.dateLastUpdated = new Date();
 	}
 
 	getTotalCost(): string {
@@ -42,6 +46,7 @@ export class ShoppingCart {
 
 	clearCart(): void {
 		this.items = [];
+		this.dateLastUpdated = new Date();
 	}
 
 	toJSON(): string {
@@ -49,7 +54,9 @@ export class ShoppingCart {
 			cart: {
 				items: this.getItems(),
 				totalCost: this.getTotalCost(),
-				itemCount: this.getItemCount()
+				itemCount: this.getItemCount(),
+				creationDate: this.creationDate,
+				dateLastUpdated: this.dateLastUpdated
 			}
 		});
 	}
@@ -57,5 +64,7 @@ export class ShoppingCart {
 	fromJSON(json: string): void {
 		const items = JSON.parse(json).cart.items;
 		this.items = items.map((item: any) => new Item(item.id, item.name, item.price, item.quantity));
+		this.creationDate = new Date(parsed.creationDate);
+		this.dateLastUpdated = new Date(parsed.dateLastUpdated);
 	}
 }

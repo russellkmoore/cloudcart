@@ -6,3 +6,6 @@ compatibility_date = "2024-06-20"
 [[kv_namespaces]]
 binding = "CARTS"
 id = "86943d725290455784202e1ea46dc11e"
+
+[triggers]
+crons = ["0 * * * *"]
