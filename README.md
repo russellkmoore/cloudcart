@@ -22,7 +22,7 @@ This is an example project made to be used as a quick start into building OpenAP
 
 1. Run `wrangler dev` to start a local instance of the API.
 2. Open `http://localhost:9000/` in your browser to see the Swagger interface where you can try the endpoints.
-3. Changes made in the `src/` folder will automatically trigger the server to reload, you only need to refresh the Swagger interface.
+3. Changes made in the `src/` folder will automatically trigger the server to reload, you only need to refresh the Swagger interface.test
 
 
 
